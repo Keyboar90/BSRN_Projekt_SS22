@@ -1,0 +1,365 @@
+#!/bin/bash
+# (obige Anweisung) ---> Erste Angabe in einem Bash-Skript.
+# Projekt Dynamische Partitionierung SS 2022.
+
+# Vorname: Lukas, Nachname: Völzing, Stand: 26. Juni 2022.
+
+# 1) Einleitungstext. Beginn des Simulators. echo -e und \n für "new line" sorgt für einen Zeilenumbruch.
+
+echo -e "==================================================================================================="  
+
+echo -e "\n| Herzlich Willkommen beim Simulator Dynamische Partitionierung/Best-Fit | Werkstück A: BSRN SS 2022\n"
+
+# Deklarationen der Arrayvariablen new_partion, process_sizes und block_sizes. 
+
+# free_blockspace ist eine Integervariable.
+
+# external_fragmentation ist eine Integervariable.
+
+# num_process ist eine Integervariable.
+
+# size_of_process ist eine Arrayvariable.
+
+declare -a new_partion
+
+declare -a process_sizes
+
+declare -a block_sizes
+
+#declare -i free_blockspace              # Ansatz für den größten/kleinsten freien Speicherblock. Versuchte Berechnung siehe: Zeile 241.
+
+#declare -i external_fragmentation
+
+#declare -i num_process                  # Ansatz für Prozesse starten und beenden.
+
+#declare -a size_of_process              # Ansatz für Prozesse starten und beenden.
+
+
+# Unteraufgabe 2.3) Ansatz: Prozesse starten und beenden.
+
+#echo -e "\nBitte geben Sie die Anzahl der Prozesse an: "                       
+
+#read -r num_process                                                            # Variable num_process wird eingelesen.
+        
+#for ((i=1 ; i<=$num_process; i++));					                        # Gehe die Anzahl der eingegebenen Prozesse in dieser For-Schleife durch.
+
+#    do
+
+#        echo -e "\nBitte geben Sie die $i. Größe des Prozesses an: "           # Eingabe der Größe des Prozesses.
+    
+#        read -a size_of_process                                                # Arrayvariable size_of_process wird eingelesen.
+        
+#        echo -ne "\nDie $i. Prozessgröße beträgt: ${size_of_process[*]}\t"     # Ausgabe der Größe des einzelnen Prozesses.
+        
+#        echo -e "\n"                                                           
+
+#    done
+
+
+# ==============================================================================    
+
+# Unteraufgabe 3) Die Steuerung des Simulators mithilfe eines Auswahlmenüs einleitend durch das Schlüsselwort select. ======================================================
+                                                                                   
+PS4="Bitte geben Sie create (c), delete (d), new (n) oder quit (q) ein:"                      # Unteraufgabe 3.1) Auswahl von Befehlen mithilfe von Shortcuts.
+
+select auswahl in create delete new quit                                                      # Die Auswahlmöglichkeiten des Simulators sind create, delete, new und quit.
+                                                                                                                                                                                                                                                                                                      
+do                                                                                            # Beginn der ersten Do-Schleife durch die select-Anweisung. Sie umfasst den gesamten Simulator. (Ende: Zeile 365)
+
+ 
+    if [ "$REPLY" = "c" ]; then                                                               # Unteraufgabe 3.2) Eingabe von Shortcut "c", um zur Partitionserstellung zu gelangen.
+        
+        read -r -p 'Partition anlegen: Bitte geben Sie den Namen der neuen Partition an: ' -a new_partion 
+        
+        echo -e "\n"                                                                          # Zeilenumbruch.                                                                      
+                
+        read -p "Wollen Sie diese Partition jetzt erstellen? [Taste c betätigen] "            # Erstellung der Partition vornehmen mit dem Shortcut "c" für create.
+        
+        if [ "$REPLY" = "c" ]; then                                                           # Reply --> Die Eingabe der Taste "c" wird durch Reply gespeichert.
+        
+            echo -e "\nDie Partition wurde erstellt und der Partitionsname lautet: ${new_partion[*]}\n" 
+
+        else
+        
+            echo -e "\nFehlermeldung: Die Partition '${new_partion[*]}' konnte leider nicht erstellt werden.\n" 
+        
+            break
+    
+        fi
+        
+    
+    while [ -e "${new_partion[*]}" ];                                # Wenn die angelegte Partition bereits existiert, dann springe in die nachfolgende Anweisung. Beginn 1. While-Schleife.
+        
+        do                                                           # Zugehörig zur 1. While-Schleife.
+        
+            read -p "Hinweis: Eine Partition mit der Bezeichnung '${new_partion[*]}' existiert bereits, Wollen Sie diese Löschen? [y/n]: "
+                
+            if [ "$REPLY" = "y" ]; then                              # Wenn der Benutzer die Partition löscht mit "y" für yes, springe dann in die nachfolgende Anweisung.
+        
+                rm -r "${new_partion[*]}"                            # Die neue simulierte Partition in Form eines Verzeichnisses mit ihrer enthaltenen Datei löschen.
+            
+                echo -e "\n"                                        
+            
+                read -p  "Hinweis: Partition '${new_partion[*]}' wurde soeben gelöscht."     
+        
+                echo -e "\n"                                                                                 
+        
+                read -p "Bitte geben Sie einen anderen Partitionsnamen ein: " -a new_partion     
+
+            else                                                     # Gehe ansonsten in diese Anweisung und der Benutzer muss einen neuen Partitionsnamen definieren.
+        
+                echo -e "\n"                                                                               
+
+                read -p "Bitte geben Sie einen anderen Partitionsnamen ein: " -a new_partion     
+                        
+                echo -e "\n"                                                                               
+            
+            fi
+            
+    done                                                             # Ende der 1. While-Schleife.
+    
+            
+    mkdir "${new_partion[*]}" && touch "${new_partion[*]}"/file.txt  # Neue simulierte Partition in Form eines Verzeichnis mit einer Textdatei erstellen.
+        
+        
+# ========================================================================================================================
+
+# -p steht für prompt. Er beschreibt die Eingabeaufforderung für den jeweiligen Benutzer.
+
+# -r dient dazu den Backslash als Teil der Zeile zu betrachten. Backslash fungiert dabei nicht als Escape-Zeichen.
+
+        
+        read -r -p 'Bitte geben Sie die Größe des Speichers in MB an: ' -a process_sizes        # Hier wird die Größe des Speichers für die Partition verlangt.
+        
+        echo -e "\nDie Größe des Speichers beträgt: ${process_sizes[*]} MB\n"                   # Die Ausgabe der Größe des Speichers für die Partition.                 
+                                                                                                                
+# Unteraufgabe 2.2) Beginn des Eingabebereichs und nachfolgende Eingabe in fortlaufender Reihenfolge der einzelnen Block- und Prozessgrößen. 
+
+        echo -e " ---> Eingabebereich: Speicherverwaltungskonzept Best-Fit <---\n"   
+        
+# Arrayvariable block_sizes steht für alle Blockgrößen. Diese Größen werden im Laufe der Benutzereingabe in die Arrayvariable block_sizes geschrieben.
+
+        read -r -p  'Bitte geben Sie beliebige Blockgrößen (in MB) in fortlaufender Reihenfolge mit Leerzeichen getrennt an: ' -a block_sizes
+        
+# Arrayvariable process_sizes steht für alle Prozessgrößen. Diese Größen werden im Laufe der Benutzereingabe in die Arrayvariable process_sizes geschrieben.
+
+        read -r -p  'Bitte geben Sie beliebige Prozessgrößen (in MB) in fortlaufender Reihenfolge mit Leerzeichen getrennt an: ' -a process_sizes
+        
+                
+# Unteraufgabe 2.2) Best-Fit Algorithmus Implementierung Beginn. ==========================================================================================
+        
+    
+# Erstellung des leeren Arrays process_block_indexes.
+
+        process_block_indexes=()
+        
+                                                 # Beginn der 1. For-Schleife. (Äußere Schleife)
+
+        for pidx in "${!process_sizes[@]}";      # Die Arrayindizees von process_sizes werden von der For-Schleife durchlaufen bzw. abgerufen. pidx steht für den Prozessindex.
+
+    do                                           # 1. Zugehörige Do-Schleife im Best-Fit Algorithmus.
+
+        psize=${process_sizes[pidx]}             # Weise der Variablen Prozessgröße (psize) alle eingegebenen Prozessgrößen aus der Arrayvariable process_sizes zu.
+    
+        best_block_idx='' best_block_size=''     # Die Variablen best_block_idx und best_block_size sind leer bzw. noch nicht zugewiesen worden.
+            
+            
+                                                 # Beginn der 2. For-Schleife. (Innere Schleife)
+
+        for bidx in "${!block_sizes[@]}";        # Die Arrayindizees von block_sizes werden von der For-Schleife durchlaufen bzw. abgerufen. bidx steht für den Blockindex.
+    
+    do                                           # 2. Zugehörige Do-Schleife im Best-Fit Algorithmus.
+    
+        bsize=${block_sizes[bidx]}               # Weise der Variablen Blockgröße (bsize) alle eingegebenen Blockgrößen aus der Arrayvariable block_sizes zu.
+        
+        (( psize > bsize )) && continue          # Die Prozessgröße ist größer als Blockgröße. Continue überspringt die restlichen Befehle in der Schleife und fängt mit dem nächsten Schleifendurchlauf an. 
+        
+
+# Erklärung: Bedingungs-Ausdruck. [[ Ausdruck ]]
+
+# Dieses Konstrukt dient zur Auswertung eines Test-Ausdrucks mit dem Datei-Attribute überprüft sowie arithmetische und String-Vergleiche durchgeführt werden können. 
+
+# Eine von beiden Bedingungen wird wahr, wenn die Länge der Zeichenkette Bestblockindex (best_block_idx) gleich null ist (mit Operator -z) ODER (||) die Blockgröße (bsize) kleiner als die Bestblockgröße (best_block_size) ist, dann wird der Blockindex (bidx) der Variable Bestblockindex (best_block_idx) zugewiesen. 
+# Die Variable Blockgröße (bsize) wird dann der Variable Bestblockgröße (best_block_size) zugeordnet. 
+# Wenn in diesem Ausdruck nur einer von beiden Bedingungen wahr ist, erfolgt die Ausführung aufgrund der ODER-Verknüpfung.
+
+        
+        if [[ -z $best_block_idx ]] || (( bsize < best_block_size )); then
+        
+            best_block_idx=$bidx          # Der Blockindex (bidx) wird dann dem Block des am besten passenden Index zugeordnet (best_block_idx).
+            
+            best_block_size=$bsize        # Die Blockgröße (bsize) mit den enthaltenen Eingaben der Blockgrößen vom Benutzer wird dann dem Block der am besten passenden Größe zugeordnet (best_block_size).
+        
+        fi
+            
+    done                                           # Ende der 2. For-Schleife. (Innere Schleife)
+    
+    
+# Der zweite Bedingungs-Ausdruck wird wahr, wenn die Länge der Zeichenkette Bestblockindex (best_block_idx) gleich null ist (Operator -z) UND continue die restlichen Befehle in der Schleife überspringt und mit dem nächsten Schleifendurchlauf beginnt.
+
+    [[ -z $best_block_idx ]] && continue           
+    
+    process_block_indexes[pidx]=$best_block_idx    # Der Inhalt der Variable best_block_idx wird der Arrayvariable process_block_indexes zugewiesen, die den Prozessindex enthält.
+    
+    
+# Ziehe die Größe des am besten passenden Blocks (best_block_size) von der Prozessgröße ab und weise das Ergebnis den Blockgrößen mit dem Index des am besten passenden Blocks zu.
+    
+    block_sizes[best_block_idx]=$(( best_block_size - psize ))  
+    
+
+    done                                           # Ende der 1. For-Schleife. (Äußere Schleife)
+    
+    
+# Unteraufgabe 2.4) Wenn die Prozess- und Blockgrößen kleiner oder gleich der bereits vordefinierten Größe der Partition sind. 
+    
+    if [ ${process_sizes[pidx]} -le ${block_sizes[bidx]} ]; then            # Hinweis: -le steht für "kleiner gleich" (less than equal to).
+        
+        echo -e "\nMeldung: Die Prozess- und Blockgrößen sind kleiner oder gleich der Größe der Partition bei der Eingabe."  
+                   
+    else 
+        
+        echo -e "\nFehlermeldung: Die Prozess- und Blockgrößen sind größer als die Größe der Partition bei der Eingabe."     
+            
+    fi
+    
+# Gebe die Prozessnummer, Prozessgröße, Blocknummer und den freien Speicher im Block mithilfe eines Zeilenumbruchs auf dem Bildschirm aus.
+
+echo -e "\n"
+
+echo -e "----------------------- Ausgabe nach Best-Fit --------------------------- "
+
+echo -e '\nProzess Nr.    Prozessgröße.        Block Nr.       Freier Speicher im Block.'
+
+# 3. For-Schleife.
+
+    for pidx in "${!process_sizes[@]}";          # Die Arrayindizees von process_sizes werden von der For-Schleife durchlaufen bzw. abgerufen. pidx steht für den Prozessindex.
+
+    do                                                          # 3. Zugehörige Do-Schleife im Best-Fit Algorithmus.                                                       
+
+        bidx=${process_block_indexes[pidx]-}                            
+        
+        #free_blockspace= bsize - psize                         # Unteraufgabe 2.6) Freier Block ermitteln. Die eingegebene Prozessgröße wird von der Blockgröße abgezogen.
+                                                                # Die Differenz davon ist der freie Speicherblock.
+                                                                # Der Ansatz für größter/kleinster freier Speicherblock.
+
+
+# Der dritte Bedingungs-Ausdruck wird wahr, wenn die Länge des Blockindex (bidx) ungleich null ist (mit Operator -n) UND (&&) die Blocknummer (bnum), die den Blockindex jeweils duch die Benutzereingaben der Blockgrößen inkrementiert oder (||) die Blocknummer den Status "nicht allokiert" hat, dann gebe die Ergebnisliste auf der Konsole aus.  
+    
+    [[ -n $bidx ]] && bnum=$(( bidx+1 )) || bnum='Nicht allokiert'
+    
+# Die Ausgaben der Ergebnisse beim Best-Fit Algorithmus.
+    
+    printf '%11d    %12d    %13s    %14s\n'  \ "$(( pidx+1 ))" "${process_sizes[pidx]}" "$bnum" "$free_blockspace"
+    
+    
+    done                                                                # Ende der 3. For-Schleife.
+    
+        
+        echo -e "\n"
+        
+        echo -e "------------------------------------------------------------------------"
+        
+        echo -e "\nDer Grad der externen Fragementierung beträgt: $external_fragmentation"  # Die Ausgabe des Grads der externen Fragementierung.
+        
+        echo -e "\nDer größte/kleinste freie Speicherblock beträgt: $free_blockspace"       # Die Ausgabe des größten/kleinsten freien Speicherblocks. 
+        
+        echo -e "\nDie Gesamtzahl belegter/freier Blöcke im Adressraum beträgt: "           # Die Ausgabe der Gesamtzahl belegter/freier Blöcke im Adressraum.
+
+        break
+        
+        
+    fi
+    
+    
+# Best-Fit Algorithmus Implementierung Ende.  ==========================================================================================
+
+
+# Eingabe von Shortcut "d", um die Partition zu löschen.  =========================================================================== 
+
+   if [ "$REPLY" = "d" ]; then                          # Unteraufgabe 3.3) 
+                   
+        read -p 'Partition löschen: Bitte geben Sie den Namen der zu löschenden Partition an: ' -a new_partion  
+        
+        echo -e "\nDer Name der zu löschenden Partition ist: ${new_partion[*]}\n" 
+            
+   fi
+        
+        
+    while [ -e "${new_partion[*]}" ];                   # Wenn die angelegte Partition bereits existiert, dann springe in die Anweisung. Beginn 2. While-Schleife.
+        
+        do                                              # Zugehörig zur 2. While-Schleife.
+        
+        read -p "Meldung: Partition '${new_partion[*]}' existiert bereits. Wollen Sie diese jetzt löschen? [Taste d betätigen] "   
+        
+            if [ "$REPLY" = "d" ]; then                 # Endgültige Löschung vornehmen mit dem Shortcut "d" für delete.
+        
+                rm -r "${new_partion[*]}"               # Die neue simulierte Partition in Form eines Verzeichnisses mit ihrer enthaltenen Datei löschen.
+        
+                echo -e "\nMeldung: Partition '${new_partion[*]}' wurde gelöscht und existiert nicht mehr.\n" 
+                
+                break
+
+            else
+        
+                echo -e "\nFehlermeldung: Partition '${new_partion[*]}' konnte nicht gelöscht werden.\n" 
+
+                break
+
+                
+            fi
+        
+        
+        done                                            # Ende der 2. While-Schleife.
+    
+            
+# Eingabe von Shortcut "n", um die Speicherbelegung der Partition zurückzusetzen.  ===========================================================================  
+
+
+  if [ "$REPLY" = "n" ]; then                          # Name der Partition erfragen, die zurückgesetzt werden soll.
+                   
+        read -p 'Speicherbelegung zurücksetzen: Bitte geben Sie den Namen der zurückzusetzenden Partition an: ' -a new_partion   
+        
+        echo -e "\nDer Name der zurückzusetzenden Partition ist: ${new_partion[*]}\n" 
+        
+  fi
+        
+        
+    while [ -e "${new_partion[*]}" ];                  # Wenn die angelegte Partition bereits existiert, dann springe in die Anweisung. Beginn 3. While-Schleife.
+        
+        do                                             # Zugehörig zur 3. While-Schleife.
+        
+        read -p "Meldung: Partition '${new_partion[*]}' existiert bereits. Wollen Sie diese jetzt zurücksetzen? [y/n] "   
+        
+            if [ "$REPLY" = "y" ]; then                # Zurücksetzung vornehmen mit dem Shortcut "y" für yes.
+        
+                echo -e "\nMeldung: Die Speicherbelegung der Partition '${new_partion[*]}' wurde zurückgesetzt.\n" 
+                
+                break
+
+            else
+        
+                echo -e "\nFehlermeldung: Die Speicherbelegung der Partition '${new_partion[*]}' konnte nicht zurückgesetzt werden.\n" 
+
+                break
+
+                
+            fi
+        
+        
+        done                                           # Ende der 3. While-Schleife.
+    
+
+# Eingabe von Shortcut "q", um den Simulator zu beenden.  ===========================================================================  
+
+
+  if [ "$REPLY" = "q" ];  then                                                                 
+    
+        break                                          # Simulator beenden. 
+        
+    else
+                                   
+        break
+       
+    fi
+    
+done                                                   # Ende der 1. Do-Schleife durch die select-Anweisung.
